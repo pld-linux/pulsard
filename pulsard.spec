@@ -45,7 +45,6 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir}/rc.d/init.d,%{_sysconfdir}/sysconfig}
 install %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/%{name}
 install %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
 
-gzip -9nf AUTHORS Protocol README
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -68,7 +67,7 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc *.gz
+%doc AUTHORS Protocol README
 %attr(755,root,root) %{_sbindir}/*
 %attr(754,root,root) %{_sysconfdir}/rc.d/init.d/%{name}
 %attr(640,root,root) %config %verify(not size mtime md5) %{_sysconfdir}/sysconfig/*
