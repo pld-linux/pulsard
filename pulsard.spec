@@ -5,8 +5,6 @@ Version:	1.0.1
 Release:	2
 License:	GPL
 Group:		Daemons
-Group(de):	Server
-Group(pl):	Serwery
 Source0:	http://download.sourceforge.net/pulsard/%{name}-%{version}.tar.gz
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
