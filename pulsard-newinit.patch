@@ -1,0 +1,180 @@
+diff -urN pulsard-1.0.1.org/initreq.h pulsard-1.0.1/initreq.h
+--- pulsard-1.0.1.org/initreq.h	Thu Jan  1 01:00:00 1970
++++ pulsard-1.0.1/initreq.h	Tue Jan  2 19:22:06 1996
+@@ -0,0 +1,41 @@
++/*
++ * initreq.h    Interface to let init spawn programs on behalf of
++ *              other programs/daemons.
++ *              Definitions based on sys_term.c from the BSD 4.4
++ *              telnetd source.
++ *
++ * Version:     @(#)initreq.h 1.25 28-Dec-1995 MvS
++ *
++ * Notes:       Implemented in sysvinit-2.58 and up, but only
++ *		for "telinit". Support for rlogind, telnetd
++ *		and rxvt/xterm will follow shortly.
++ */
++#ifndef _INITREQ_H
++#define _INITREQ_H
++
++#include <sys/param.h>
++
++#define INIT_MAGIC 0x03091969
++#define INIT_FIFO  "/dev/initctl"
++#define INIT_CMD_START	       0
++#define INIT_CMD_RUNLVL        1
++#define INIT_CMD_POWERFAIL     2
++#define INIT_CMD_POWERFAILNOW  3
++#define INIT_CMD_POWEROK       4
++
++struct init_request {
++  int magic;			/* Magic number                 */
++  int cmd;			/* What kind of request         */
++  int runlevel;			/* Runlevel to change to        */
++  int sleeptime;		/* Time between TERM and KILL   */
++  char gen_id[8];		/* Beats me.. telnetd uses "fe" */
++  char tty_id[16];		/* Tty name minus /dev/tty      */
++  char host[MAXHOSTNAMELEN];    /* Hostname                     */
++  char term_type[16];		/* Terminal type                */
++  int signal;			/* Signal to send               */
++  int pid;			/* Process to send to           */
++  char exec_name[128];	        /* Program to execute           */
++  char reserved[128];		/* For future expansion.        */
++};
++
++#endif
+diff -urN pulsard-1.0.1.org/pulsard.c pulsard-1.0.1/pulsard.c
+--- pulsard-1.0.1.org/pulsard.c	Sat Aug  4 12:07:08 2001
++++ pulsard-1.0.1/pulsard.c	Sat Aug  4 12:33:34 2001
+@@ -37,12 +37,14 @@
+ #include <signal.h>
+ #include <sys/stat.h>
+ #include <sys/types.h>
++#include <fcntl.h>
+ #include <linux/limits.h>
+ 
+ #include "pulsard.h"
+ #include "serial.h"
+ #include "util.h"
+ #include "options.h"
++#include "initreq.h"
+ 
+ #define MAX_TRY	3
+ 
+@@ -72,7 +74,6 @@
+ #define LEN_SX 2
+ #define STR_SN "\x53\x6E"			/* Sn : delay before power off */
+ 
+-
+ char recv_buffer[255];
+ int power_fail=0, overload=0, low_battery=0;
+ int input_volt=0, input_freq=0, time_remaining=0;
+@@ -81,6 +82,36 @@
+ char pidfile[PATH_MAX];
+ int commstatus=0;
+ 
++
++/* Power status function from sysvinit */
++void alrm_handler()
++{
++}
++
++int powerstate(int state)
++{
++  int fd;
++  struct init_request req;
++
++  /* Fill out the request struct. */
++  memset(&req, 0, sizeof(req));
++  req.magic = INIT_MAGIC;
++  req.cmd   = state;
++
++  /* Open the fifo (with timeout) */
++  signal(SIGALRM, alrm_handler);
++  alarm(3);
++  if ((fd = open(INIT_FIFO, O_WRONLY)) >= 0
++                && write(fd, &req, sizeof(req)) == sizeof(req)) {
++        close(fd);
++	alarm(0);
++	return 0; /* OK */
++  }
++  alarm(0);
++  return -1; /* FAIL */
++}
++
++
+ /*
+ *	terminate the program gracefully
+ */
+@@ -211,12 +242,8 @@
+ 					}
+ 					sigexit(-1);
+ 				}
+-				if (test != 1 && (fp = fopen (PWRFILE, "w+")) != NULL) {
+-					fprintf(fp,"OK");
+-					fclose(fp);
+-				}
+-				else {
+-					syslog(LOG_ERR, "Could not write to %s - exiting",PWRFILE);
++				if (test != 1 && powerstate(INIT_CMD_POWEROK)) {
++					syslog(LOG_ERR, "Could not set powerstate to OK - exiting");
+ 					sigexit(-1);
+ 				}
+ 			}
+@@ -379,12 +406,8 @@
+ 			if (low_battery==0) {
+ 				low_battery=1;
+ 				syslog(LOG_EMERG,"Battery low! - shutdown immediatly");
+-				if (test != 1 && (fp = fopen (PWRFILE, "w+")) != NULL) {
+-					fprintf(fp,"LOW");
+-					fclose(fp);
+-				}
+-				else
+-					syslog(LOG_ALERT, "Could not write to %s",PWRFILE);
++				if (test != 1 && powerstate(INIT_CMD_POWERFAILNOW))
++					syslog(LOG_ALERT, "Could not set powerstate to FAIL NOW");
+ 				if (test!=1) 
+ 					kill(init_pid,SIGPWR);
+ 			}
+@@ -394,11 +417,7 @@
+ 			if (power_fail==0) {
+ 				power_fail=1;
+ 				syslog(LOG_CRIT,"Power Fail!");
+-				if (test != 1 && (fp = fopen (PWRFILE, "w+")) != NULL) {
+-					fprintf(fp,"FAIL");
+-					fclose(fp);
+-				}
+-				else
++				if (test != 1 && powerstate(INIT_CMD_POWERFAIL))
+ 					syslog(LOG_ALERT, "Could not write to %s",PWRFILE);
+ 				
+ 				if (test!=1)
+@@ -408,14 +427,8 @@
+ 		if (pkt[5]=='0') {
+ 			if (power_fail==1) {
+ 				syslog(LOG_CRIT,"Power Restored!");
+-				if (test != 1) {
+-					if ((fp = fopen (PWRFILE, "w+")) != NULL) {
+-						fprintf(fp,"OK");
+-						fclose(fp);
+-					}
+-					else
+-						syslog(LOG_ALERT, "Could not write to %s",PWRFILE);
+-				}
++				if (test != 1 && powerstate(INIT_CMD_POWEROK))
++						syslog(LOG_ALERT, "Could not set powerstate to OK");
+ 				if (test!=1)
+ 					kill(init_pid,SIGPWR);
+ 				power_fail=0;
+diff -urN pulsard-1.0.1.org/serial.c pulsard-1.0.1/serial.c
+--- pulsard-1.0.1.org/serial.c	Sat Aug  4 12:07:08 2001
++++ pulsard-1.0.1/serial.c	Sat Aug  4 12:14:51 2001
+@@ -58,7 +58,7 @@
+ 	char portfile[NAME_MAX];
+ 
+ 
+-	gpio_init();
++	gpio_init(0);
+ 	gdev = gpio_new(GPIO_DEVICE_SERIAL);
+ 
+ 	serial_set_settings();

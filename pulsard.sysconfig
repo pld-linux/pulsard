@@ -1,0 +1,9 @@
+# Nice level 
+SERVICE_RUN_NICE_LEVEL="+5"
+
+# Default device
+DEVICE="/dev/ttyS1"
+
+# Extra options. See pulsard(8) man page.
+OPTIONS=""
+
