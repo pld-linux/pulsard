@@ -37,13 +37,13 @@ rm -f missing
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{%{_sysconfdir}/rc.d/init.d,%{_sysconfdir}/sysconfig}
+install -d $RPM_BUILD_ROOT{/etc/rc.d/init.d,/etc/sysconfig}
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/%{name}
-install %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
+install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/%{name}
+install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/%{name}
 
 
 %clean
@@ -52,15 +52,15 @@ rm -rf $RPM_BUILD_ROOT
 %post
 /sbin/chkconfig --add %{name}
 if [ -f %{_var}/lock/subsys/%{name} ]; then
-	%{_sysconfdir}/rc.d/init.d/%{name} restart >&2
+	/etc/rc.d/init.d/%{name} restart >&2
 else
-	echo "Run \"%{_sysconfdir}/rc.d/init.d/%{name} start\" to start pulsard ups daemon."
+	echo "Run \"/etc/rc.d/init.d/%{name} start\" to start pulsard ups daemon."
 fi
 
 %preun
 if [ "$1" = "0" ]; then
 	if [ -f %{_var}/lock/subsys/%{name} ]; then
-		%{_sysconfdir}/rc.d/init.d/%{name} stop >&2
+		/etc/rc.d/init.d/%{name} stop >&2
 	fi
 	/sbin/chkconfig --del %{name}
 fi
@@ -69,6 +69,6 @@ fi
 %defattr(644,root,root,755)
 %doc AUTHORS Protocol README
 %attr(755,root,root) %{_sbindir}/*
-%attr(754,root,root) %{_sysconfdir}/rc.d/init.d/%{name}
-%attr(640,root,root) %config %verify(not size mtime md5) %{_sysconfdir}/sysconfig/*
+%attr(754,root,root) /etc/rc.d/init.d/%{name}
+%attr(640,root,root) %config %verify(not size mtime md5) /etc/sysconfig/*
 %{_mandir}/man?/*
