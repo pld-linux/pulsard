@@ -16,7 +16,7 @@ BuildRequires:	automake
 BuildRequires:	libgpio-devel >= 0.0.2
 PreReq:		rc-scripts
 Requires(post,preun):	/sbin/chkconfig
-Buildroot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 Pulsard is a monitoring software for MGE Pulsar UPSes.
