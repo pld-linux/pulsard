@@ -11,11 +11,11 @@ Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Patch0:		%{name}-newinit.patch
 URL:		http://pulsard.sourceforge.net/
-BuildRequires:	libgpio-devel >= 0.0.2
-BuildRequires:	automake
 BuildRequires:	autoconf
-Prereq:		rc-scripts
-Prereq:		/sbin/chkconfig
+BuildRequires:	automake
+BuildRequires:	libgpio-devel >= 0.0.2
+PreReq:		rc-scripts
+Requires(post,preun):	/sbin/chkconfig
 Buildroot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -46,7 +46,6 @@ install -d $RPM_BUILD_ROOT{/etc/rc.d/init.d,/etc/sysconfig}
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/%{name}
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/%{name}
 
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -71,5 +70,5 @@ fi
 %doc AUTHORS Protocol README
 %attr(755,root,root) %{_sbindir}/*
 %attr(754,root,root) /etc/rc.d/init.d/%{name}
-%attr(640,root,root) %config %verify(not size mtime md5) /etc/sysconfig/*
+%attr(640,root,root) %config(noreplace) %verify(not size mtime md5) /etc/sysconfig/*
 %{_mandir}/man?/*
