@@ -29,7 +29,6 @@ Pulsard to program monitoruj±cy dla UPS-ów MGE Pulsar.
 %patch0 -p1
 
 %build
-rm -f missing
 %{__aclocal}
 %{__autoconf}
 %{__automake}
