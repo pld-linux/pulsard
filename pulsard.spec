@@ -1,8 +1,8 @@
 Summary:	UPS monitoring program for MGE Pulsar UPSes
-Summary(pl):	Program do monitorowania UPSów MGE Pulsar
+Summary(pl):	Program do monitorowania UPS-ów MGE Pulsar
 Name:		pulsard
 Version:	1.0.1
-Release:	1
+Release:	2
 License:	GPL
 Group:		Daemons
 Group(de):	Server
@@ -16,20 +16,21 @@ BuildRequires:	libgpio-devel >= 0.0.2
 BuildRequires:	automake
 BuildRequires:	autoconf
 Prereq:		rc-scripts
+Prereq:		/sbin/chkconfig
 Buildroot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 Pulsard is a monitoring software for MGE Pulsar UPSes.
 
 %description -l pl
-Pulsard to program monitoruj±cy dla UPSów MGE Pulsar.
+Pulsard to program monitoruj±cy dla UPS-ów MGE Pulsar.
 
 %prep
 %setup -q
 %patch0 -p1
 
 %build
-rm missing
+rm -f missing
 aclocal
 autoconf
 automake -a -c
@@ -48,6 +49,9 @@ install %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
 
 gzip -9nf AUTHORS Protocol README
 
+%clean
+rm -rf $RPM_BUILD_ROOT
+
 %post
 /sbin/chkconfig --add %{name}
 if [ -f %{_var}/lock/subsys/%{name} ]; then
@@ -63,9 +67,6 @@ if [ "$1" = "0" ]; then
 	fi
 	/sbin/chkconfig --del %{name}
 fi
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
