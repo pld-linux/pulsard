@@ -6,6 +6,7 @@ Release:	2
 License:	GPL
 Group:		Daemons
 Source0:	http://download.sourceforge.net/pulsard/%{name}-%{version}.tar.gz
+# Source0-md5:	4fb74308f9b4c571fb818d349bed5d5c
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Patch0:		%{name}-newinit.patch
