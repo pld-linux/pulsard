@@ -30,19 +30,16 @@ case "$1" in
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/pulsard
 	else
-		# show "%s service is already running." pulsard
 		msg_already_running pulsard
 	fi
 	;;
   stop)
 	# Stop daemons.
-	# show "Stopping %s service" pulsard
 	if [ -f /var/lock/subsys/pulsard ]; then
 		msg_stopping pulsard
 		killproc pulsard
 		rm -f /var/lock/subsys/pulsard
 	else
-		# show "%s service is not running." pulsard
 		msg_not_running pulsard
 	fi	
 	;;
@@ -56,7 +53,6 @@ case "$1" in
 	exit $?
 	;;
   *)
-	# show "Usage: %s {start|stop|restart|force-reload|status}"
 	msg_usage "$0 {start|stop|restart|force-reload|status}"
 	exit 3
 esac
