@@ -41,7 +41,7 @@ case "$1" in
 		rm -f /var/lock/subsys/pulsard
 	else
 		msg_not_running pulsard
-	fi	
+	fi
 	;;
   restart|force-reload)
 	$0 stop
