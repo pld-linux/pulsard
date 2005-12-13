@@ -5,7 +5,7 @@ Version:	1.0.1
 Release:	2
 License:	GPL
 Group:		Daemons
-Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+Source0:	http://dl.sourceforge.net/pulsard/%{name}-%{version}.tar.gz
 # Source0-md5:	4fb74308f9b4c571fb818d349bed5d5c
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
@@ -14,8 +14,8 @@ URL:		http://pulsard.sourceforge.net/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libgpio-devel >= 0.0.2
-PreReq:		rc-scripts
 Requires(post,preun):	/sbin/chkconfig
+Requires:	rc-scripts
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -69,5 +69,5 @@ fi
 %doc AUTHORS Protocol README
 %attr(755,root,root) %{_sbindir}/*
 %attr(754,root,root) /etc/rc.d/init.d/%{name}
-%attr(640,root,root) %config(noreplace) %verify(not size mtime md5) /etc/sysconfig/*
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/*
 %{_mandir}/man?/*
