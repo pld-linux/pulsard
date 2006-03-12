@@ -1,0 +1,2 @@
+- fixed Source url,
+- removed using some %{__*} macros.
