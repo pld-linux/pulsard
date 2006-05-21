@@ -2,7 +2,7 @@ Summary:	UPS monitoring program for MGE Pulsar UPSes
 Summary(pl):	Program do monitorowania UPS-ów MGE Pulsar
 Name:		pulsard
 Version:	1.0.1
-Release:	2
+Release:	3
 License:	GPL
 Group:		Daemons
 Source0:	http://dl.sourceforge.net/pulsard/%{name}-%{version}.tar.gz
