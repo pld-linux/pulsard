@@ -1,5 +1,5 @@
 Summary:	UPS monitoring program for MGE Pulsar UPSes
-Summary(pl):	Program do monitorowania UPS-ów MGE Pulsar
+Summary(pl.UTF-8):   Program do monitorowania UPS-Ã³w MGE Pulsar
 Name:		pulsard
 Version:	1.0.1
 Release:	3
@@ -22,8 +22,8 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 Pulsard is a monitoring software for MGE Pulsar UPSes.
 
-%description -l pl
-Pulsard to program monitoruj±cy dla UPS-ów MGE Pulsar.
+%description -l pl.UTF-8
+Pulsard to program monitorujÄ…cy dla UPS-Ã³w MGE Pulsar.
 
 %prep
 %setup -q
